@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yemek Tarifi Filtreleme</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 28%;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease-in-out;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        details[open] {
+            height: auto;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            color: white;
+            padding: 15px;
+            border: 2px solid #FB9EC6;
+            border-radius: 5px;
+            display: inline-block;
+            background-color: #FB9EC6;
+
+        }
+
+        .card h2:hover {
+            border-color: #FB9EC6;
+            background-color: #FB9EC6;
+        }
+
+        label {
+            font-size: 1em;
+            color: #555;
+            text-align: left;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .checkbox-group label {
+            display: inline-block; /* Yan yana düzenleme */
+            margin: 5px; /* Etiketler arasında boşluk */
+            padding: 5px 10px; /* İç boşluk */
+            border: 1px solid #ddd; /* İsteğe bağlı: Görünüm için sınır */
+            border-radius: 5px; /* İsteğe bağlı: Köşe yuvarlatma */
+            white-space: nowrap; /* Metnin taşmasını önler */
+        }
+
+        details {
+            margin-bottom: 10px;
+        }
+
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff7675;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e84118;
+        }
+
+        input[type="checkbox"] {
+            accent-color: #FB9EC6; /* Pembe */
+        }
+
+        #recipeDisplay {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .selected-filters {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Öğeleri yatayda ortalar */
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap; /* Satır başına sığmayan kartlar yeni satıra geçer */
+            text-align: center; /* Metni de ortalar */
+        }
+
+        .exlude-card {
+            padding: 10px 20px;
+            background-color: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .include-card {
+            padding: 10px 20px;
+            background-color: #A4D8B7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .intolerances-card {
+            padding: 10px 20px;
+            background-color: #FFED80;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .backButton {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            position: absolute; /* Absolute positioning for the card */
+            top: 10px; /* Distance from the top */
+            left: 10px; /* Distance from the left */
+            z-index: 1;
+        }
+
+        #backButton {
+            background-color: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #backButton:hover {
+            background-color: #e84118;
+        }
+    </style>
+</head>
+<body>
+<div class="backButton">
+    <button id="backButton" onclick="window.history.back()">Geri Dön</button>
+</div>
+
+<h1>Yemek Tarifi Filtreleme</h1>
+
+
+<div id="recipeDisplay">
+    <div class="selected-filters">
+    </div>
+    <!-- "Tarif Bul" butonuna tıklanıldığında tarif arama fonksiyonu çalışacak -->
+    <button onclick="findRecipe()">Tarif Bul</button>
+</div>
+
+<div class="container">
+    <!-- İstenmeyenler başlığı altında filtreler -->
+    <div class="card">
+        <h2>İstenmeyenler</h2>
+        <details>
+            <!-- Yemek türü seçimi için checkbox grubu -->
+            <summary>Yemek Türü Seçiniz:</summary>
+            <div class="checkbox-group" id="excludeMealType">
+                <label><input type="checkbox" value="main Course"> Ana Yemek</label>
+                <label><input type="checkbox" value="side Dish"> Ara Yemek</label>
+                <label><input type="checkbox" value="dessert"> Tatlı</label>
+                <label><input type="checkbox" value="appetizer"> Aperatif</label>
+                <label><input type="checkbox" value="salad"> Salata</label>
+                <label><input type="checkbox" value="bread"> Ekmek</label>
+                <label><input type="checkbox" value="breakfast"> Kahvaltılık</label>
+                <label><input type="checkbox" value="soup"> Çorba</label>
+                <label><input type="checkbox" value="beverage,drink"> İçecek</label>
+                <label><input type="checkbox" value="sauce"> Sos</label>
+                <label><input type="checkbox" value="marinade"> Marine</label>
+                <label><input type="checkbox" value="fingerfood,snack"> Atıştırmalık</label>
+            </div>
+        </details>
+
+        <details>
+            <!-- Mutfak türü seçimi için checkbox grubu -->
+            <summary>Mutfak Türü Seçiniz:</summary>
+            <div class="checkbox-group" id="excludeCuisineType">
+                <label><input type="checkbox" value="african"> Afrika</label>
+                <label><input type="checkbox" value="asian"> Asya</label>
+                <label><input type="checkbox" value="american"> Amerikan</label>
+                <label><input type="checkbox" value="british"> İngiliz</label>
+                <label><input type="checkbox" value="cajun"> Cajun</label>
+                <label><input type="checkbox" value="caribbean"> Karayip</label>
+                <label><input type="checkbox" value="chinese"> Çin</label>
+                <label><input type="checkbox" value="eastern European"> Doğu Avrupa</label>
+                <label><input type="checkbox" value="european"> Avrupa</label>
+                <label><input type="checkbox" value="french"> Fransız</label>
+                <label><input type="checkbox" value="german"> Alman</label>
+                <label><input type="checkbox" value="greek"> Yunan</label>
+                <label><input type="checkbox" value="indian"> Hint</label>
+                <label><input type="checkbox" value="irish"> İrlanda</label>
+                <label><input type="checkbox" value="italian"> İtalyan</label>
+                <label><input type="checkbox" value="japanese"> Japon</label>
+                <label><input type="checkbox" value="jewish"> Yahudi</label>
+                <label><input type="checkbox" value="korean"> Kore</label>
+                <label><input type="checkbox" value="latin American"> Latin Amerika</label>
+                <label><input type="checkbox" value="mediterranean"> Akdeniz</label>
+                <label><input type="checkbox" value="mexican"> Meksika</label>
+                <label><input type="checkbox" value="middle Eastern"> Orta Doğu</label>
+                <label><input type="checkbox" value="nordic"> Nordik</label>
+                <label><input type="checkbox" value="southern"> Güney</label>
+                <label><input type="checkbox" value="spanish"> İspanyol</label>
+                <label><input type="checkbox" value="thai"> Tayland</label>
+                <label><input type="checkbox" value="vietnamese"> Vietnam</label>
+            </div>
+        </details>
+
+        <details>
+            <!-- Diyet kısıtlamaları seçimi için checkbox grubu -->
+            <summary>Diyet Kısıtlamaları Seçiniz:</summary>
+            <div class="checkbox-group" id="excludeDietaryRestrictions">
+                <label><input type="checkbox" value="gluten Free"> Glutensiz</label>
+                <label><input type="checkbox" value="ketogenic"> Ketojenik</label>
+                <label><input type="checkbox" value="vegetarian"> Vejetaryen</label>
+                <label><input type="checkbox" value="lacto vegetarian"> Lakto Vejetaryen</label>
+                <label><input type="checkbox" value="ovo-Vegetarian"> Ovo Vejetaryen</label>
+                <label><input type="checkbox" value="vegan"> Vegan</label>
+                <label><input type="checkbox" value="pescetarian"> Pesketaryen</label>
+                <label><input type="checkbox" value="paleo"> Paleo</label>
+                <label><input type="checkbox" value="primal"> Primal</label>
+                <label><input type="checkbox" value="low FODMAP"> Düşük FODMAP</label>
+            </div>
+        </details>
+    </div>
+
+    <!-- İstenilenler başlığı altında filtreler -->
+    <div class="card">
+        <h2>İstenenler</h2>
+        <details>
+            <!-- Yemek türü seçimi için checkbox grubu -->
+            <summary>Yemek Türü Seçiniz:</summary>
+            <div class="checkbox-group" id="includeMealType">
+                <label><input type="checkbox" value="main Course"> Ana Yemek</label>
+                <label><input type="checkbox" value="side Dish"> Ara Yemek</label>
+                <label><input type="checkbox" value="dessert"> Tatlı</label>
+                <label><input type="checkbox" value="appetizer"> Aperatif</label>
+                <label><input type="checkbox" value="salad"> Salata</label>
+                <label><input type="checkbox" value="bread"> Ekmek</label>
+                <label><input type="checkbox" value="breakfast"> Kahvaltı</label>
+                <label><input type="checkbox" value="soup"> Çorba</label>
+                <label><input type="checkbox" value="beverage,drink"> İçecek</label>
+                <label><input type="checkbox" value="sauce"> Sos</label>
+                <label><input type="checkbox" value="marinade"> Marine</label>
+                <label><input type="checkbox" value="fingerfood,snack"> Atıştırmalık</label>
+            </div>
+        </details>
+
+        <details>
+            <!-- Mutfak türü seçimi için checkbox grubu -->
+            <summary>Mutfak Türü Seçiniz:</summary>
+            <div class="checkbox-group" id="includeCuisineType">
+                <label><input type="checkbox" value="african"> Afrika</label>
+                <label><input type="checkbox" value="asian"> Asya</label>
+                <label><input type="checkbox" value="american"> Amerikan</label>
+                <label><input type="checkbox" value="british"> İngiliz</label>
+                <label><input type="checkbox" value="cajun"> Cajun</label>
+                <label><input type="checkbox" value="caribbean"> Karayip</label>
+                <label><input type="checkbox" value="chinese"> Çin</label>
+                <label><input type="checkbox" value="eastern European"> Doğu Avrupa</label>
+                <label><input type="checkbox" value="european"> Avrupa</label>
+                <label><input type="checkbox" value="french"> Fransız</label>
+                <label><input type="checkbox" value="german"> Alman</label>
+                <label><input type="checkbox" value="greek"> Yunan</label>
+                <label><input type="checkbox" value="indian"> Hint</label>
+                <label><input type="checkbox" value="irish"> İrlanda</label>
+                <label><input type="checkbox" value="italian"> İtalyan</label>
+                <label><input type="checkbox" value="japanese"> Japon</label>
+                <label><input type="checkbox" value="jewish"> Yahudi</label>
+                <label><input type="checkbox" value="korean"> Kore</label>
+                <label><input type="checkbox" value="latin American"> Latin Amerika</label>
+                <label><input type="checkbox" value="mediterranean"> Akdeniz</label>
+                <label><input type="checkbox" value="mexican"> Meksika</label>
+                <label><input type="checkbox" value="middle Eastern"> Orta Doğu</label>
+                <label><input type="checkbox" value="nordic"> Nordik</label>
+                <label><input type="checkbox" value="southern"> Güney</label>
+                <label><input type="checkbox" value="spanish"> İspanyol</label>
+                <label><input type="checkbox" value="thai"> Tayland</label>
+                <label><input type="checkbox" value="vietnamese"> Vietnam</label>
+            </div>
+        </details>
+
+        <details>
+            <!-- Diyet kısıtlamaları seçimi için checkbox grubu -->
+            <summary>Diyet Kısıtlamaları Seçiniz:</summary>
+            <div class="checkbox-group" id="includeDietaryRestrictions">
+                <label><input type="checkbox" value="gluten Free"> Glutensiz</label>
+                <label><input type="checkbox" value="ketogenic"> Ketojenik</label>
+                <label><input type="checkbox" value="vegetarian"> Vejetaryen</label>
+                <label><input type="checkbox" value="lacto vegetarian"> Lakto Vejetaryen</label>
+                <label><input type="checkbox" value="ovo-Vegetarian"> Ovo Vejetaryen</label>
+                <label><input type="checkbox" value="vegan"> Vegan</label>
+                <label><input type="checkbox" value="pescetarian"> Pesketaryen</label>
+                <label><input type="checkbox" value="paleo"> Paleo</label>
+                <label><input type="checkbox" value="primal"> Primal</label>
+                <label><input type="checkbox" value="low FODMAP"> Düşük FODMAP</label>
+            </div>
+        </details>
+    </div>
+
+    <!-- Alerjenler başlığı altında filtreler -->
+    <div class="card ">
+        <h2>Alerjenler</h2>
+        <details>
+            <!-- Alerjen seçimi için checkbox grubu -->
+            <summary>Alerjenleri Seçiniz:</summary>
+            <div class="checkbox-group" id="intolerances">
+                <label><input type="checkbox" value="dairy"> Süt</label>
+                <label><input type="checkbox" value="egg"> Yumurta</label>
+                <label><input type="checkbox" value="gluten"> Gluten</label>
+                <label><input type="checkbox" value="grain"> Tahıl</label>
+                <label><input type="checkbox" value="peanut"> Yer Fıstığı</label>
+                <label><input type="checkbox" value="seafood"> Deniz Ürünleri</label>
+                <label><input type="checkbox" value="sesame"> Susam</label>
+                <label><input type="checkbox" value="shellfish"> Kabuklu Deniz Ürünleri</label>
+                <label><input type="checkbox" value="soy"> Soya</label>
+                <label><input type="checkbox" value="sulfite"> Sülfit</label>
+                <label><input type="checkbox" value="tree Nut"> Kuruyemiş</label>
+                <label><input type="checkbox" value="wheat"> Buğday</label>
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // Checkbox grubundan seçilen değerleri almak için fonksiyon
+    function getSelectedValues(checkboxGroup) {
+        // Seçilen tüm checkbox'ları seçer ve NodeList'i bir diziye dönüştürür
+        const selectedOptions = Array.from(checkboxGroup.querySelectorAll('input:checked'));
+        return selectedOptions.map(option => option.value).join(', ');
+    }
+
+    // Seçilen filtrelere göre bir tarif bulma fonksiyonu
+    function findRecipe() {
+        // Her filtre grubundan (yemek türü, mutfak türü, diyet kısıtlamaları) seçilen değerleri alır
+        const excludeMealType = getSelectedValues(document.getElementById('excludeMealType'));
+        const excludeCuisineType = getSelectedValues(document.getElementById('excludeCuisineType'));
+        const excludeDietaryRestrictions = getSelectedValues(document.getElementById('excludeDietaryRestrictions'));
+
+        const includeMealType = getSelectedValues(document.getElementById('includeMealType'));
+        const includeCuisineType = getSelectedValues(document.getElementById('includeCuisineType'));
+        const includeDietaryRestrictions = getSelectedValues(document.getElementById('includeDietaryRestrictions'));
+
+        const intolerances = getSelectedValues(document.getElementById('intolerances'));
+
+        // Hariç tutulacak ve dahil edilecek etiketleri oluşturup seçilen tüm değerleri birleştiriyoruz
+        const excludeTags = [excludeMealType, excludeCuisineType, excludeDietaryRestrictions, intolerances]
+            .filter(Boolean)
+            .join(', ');
+
+        const includeTags = [includeMealType, includeCuisineType, includeDietaryRestrictions]
+            .filter(Boolean)
+            .join(', ');
+
+        // Dinamik olarak form öğesi oluşturuluyor
+        const form = document.createElement('form');
+        form.action = '/find_random_recipe'; // Formu gönderiyoruz
+        form.method = 'post';
+
+        // Hariç tutulacak etiketler için gizli input oluşturulup forma ekleniyor
+        const excludeTagsInput = document.createElement('input');
+        excludeTagsInput.type = 'hidden';
+        excludeTagsInput.name = 'exclude_tags';
+        excludeTagsInput.value = excludeTags;
+        form.appendChild(excludeTagsInput);
+
+        // Dahil edilecek etiketler için gizli input oluşturulup forma ekleniyor
+        const includeTagsInput = document.createElement('input');
+        includeTagsInput.type = 'hidden';
+        includeTagsInput.name = 'include_tags';
+        includeTagsInput.value = includeTags;
+        form.appendChild(includeTagsInput);
+
+        // Formu belgeye ekleyip gönderiyoruz
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // 'card' öğelerinin içindeki her 'details' öğesine event listener ekliyoruz
+    document.querySelectorAll('.card details').forEach(detail => {
+        detail.addEventListener('toggle', function () {
+            // Tüm 'card' öğelerinin yüksekliklerini sıfırlıyoruz
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.height = "";
+            });
+
+            if (this.open) {
+                // Diğer tüm 'details' öğelerini kapatıyoruz, sadece tıklanan öğe açık kalacak
+                document.querySelectorAll('.card details').forEach(otherDetail => {
+                    if (otherDetail !== this) {
+                        otherDetail.open = false;
+                    }
+                });
+
+                // Sadece tıklanan 'details' öğesinin bulunduğu kartı genişletiyoruz
+                this.closest('.card').style.height = "auto";
+            }
+        });
+    });
+
+    // Seçilen filtreleri dinamik olarak tutmak için diziler
+    let selectedExludeFilters = [];
+    let selectedIncludeFilters = [];
+    let selectedIntolerancesFilters = [];
+
+    // Seçilen filtreleri sayfada görüntüleme fonksiyonu
+    function displayFilters() {
+        const filtersContainer = document.querySelector('.selected-filters'); //filtreler burada gösterilecek
+        filtersContainer.innerHTML = ''; // Konteyneri her seferinde temizledik
+
+        // Hariç tutulan filtreleri görüntüle
+        selectedExludeFilters.forEach(filter => {
+            const filterCard = document.createElement('div');
+            filterCard.className = 'exlude-card'; // Filtre kartı için bir div oluşturuyoruz
+            filterCard.textContent = filter;
+            filtersContainer.appendChild(filterCard); // Kartı konteynere ekliyoruz
+        });
+
+        // Dahil edilen filtreleri görüntüle
+        selectedIncludeFilters.forEach(filter => {
+            const filterCard = document.createElement('div');
+            filterCard.className = 'include-card'; // Filtre kartı için bir div oluştur
+            filterCard.textContent = filter;
+            filtersContainer.appendChild(filterCard);
+        });
+
+        // İntolerans filtrelerini görüntüle
+        selectedIntolerancesFilters.forEach(filter => {
+            const filterCard = document.createElement('div');
+            filterCard.className = 'intolerances-card'; // Filtre kartı için bir div oluştur
+            filterCard.textContent = filter;
+            filtersContainer.appendChild(filterCard);
+        });
+    }
+
+    // Checkbox'lar için event listener ekleme
+    const ExludeCheckboxes = document.querySelectorAll('#excludeMealType input, #excludeCuisineType input, #excludeDietaryRestrictions input');
+    const IncludeCheckboxes = document.querySelectorAll('#includeMealType input, #includeCuisineType input, #includeDietaryRestrictions input');
+    const IntolerancesCheckboxes = document.querySelectorAll('#intolerances input');
+
+    // Hariç tutulan filtreler için checkbox'lar
+    ExludeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            if (checkbox.checked)
+                selectedExludeFilters.push(checkbox.parentElement.textContent.trim()); // Checkbox işaretlendiğinde filtreyi ekle
+            else
+                // Checkbox işareti kaldırıldığında, filtreyi listeden çıkartmak için
+                selectedExludeFilters = selectedExludeFilters.filter(filter => filter !== checkbox.parentElement.textContent.trim());
+            displayFilters(); // Filtreleri günceller
+        });
+    });
+
+    // Dahil edilen filtreler için checkbox'lar
+    IncludeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            if (checkbox.checked)
+                selectedIncludeFilters.push(checkbox.parentElement.textContent.trim()); // Checkbox işaretlendiğinde filtreyi ekle
+            else
+                selectedIncludeFilters = selectedIncludeFilters.filter(filter => filter !== checkbox.parentElement.textContent.trim());
+            displayFilters();
+        });
+    });
+
+    // İntolerans filtreleri için checkbox'lar
+    IntolerancesCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            if (checkbox.checked)
+                selectedIntolerancesFilters.push(checkbox.parentElement.textContent.trim()); // Checkbox işaretlendiğinde filtreyi ekle
+            else
+                // Checkbox işareti kaldırıldığında, filtreyi listeden çıkar
+                selectedIntolerancesFilters = selectedIntolerancesFilters.filter(filter => filter !== checkbox.parentElement.textContent.trim());
+            displayFilters();
+        });
+    });
+
+</script>
+</body>
+</html>
